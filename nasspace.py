@@ -46,22 +46,6 @@ class Nasbench:
     def get_str(self, uid):
         return ast.literal_eval(self.df_conf[uid])['arch_str']
 
-    def NNDegree(searchspace, uid):
-
-      strOp = searchspace.get_str(uid)
-      listOp = strOp.split('|')
-      id = [1,4,8]
-      nConv = strOp.count('conv')
-      skip1 = [3,7]
-      skip2 = [6]
-      nID = ''.join([i for j, i in enumerate(listOp) if j in id]).count('skip')
-      nS1 = ''.join([i for j, i in enumerate(listOp) if j in skip1]).count('skip')
-      nS2  = ''.join([i for j, i in enumerate(listOp) if j in skip2]).count('skip')
-      nNone = strOp.count('none')
-      #skip = searchspace.get_unique_str(uid).count('skip')
-      Sc = (nS1+2*nS2)
-      Wc = nConv
-      return int((Wc + Sc))
       
     def get_unique_str(self, uid):
         arch_str = ast.literal_eval(self.df_conf[uid])['arch_str']
@@ -151,7 +135,16 @@ class Nasbench:
         #return info['train-all-time'] + info['valid-per-time']
     def mutate_arch(self, arch):
         op_names = get_search_spaces('cell', 'nas-bench-201')
-        config = self.api.get_net_config(arch, self.dataset)
+        # config = self.api.get_net_config(arch, self.dataset)
+        #config = self.api.get_net_config(arch, 'cifar10-valid')
+        # parent_arch = Structure(self.api.str2lists(config['arch_str']))
+        config = ast.literal_eval(self.df_conf[arch])
+        if self.dataset == 'ImageNet16-120':
+          config['num_classes'] = 120
+        if self.dataset == 'cifar100':
+          config['num_classes'] = 100
+        else:
+          config['num_classes'] = 10
         #config = self.api.get_net_config(arch, 'cifar10-valid')
         parent_arch = Structure(self.api.str2lists(config['arch_str']))
         child_arch = deepcopy( parent_arch )
